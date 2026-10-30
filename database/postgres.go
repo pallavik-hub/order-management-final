@@ -15,8 +15,9 @@ import (
 )
 
 func NewPostgresDB(cfg *config.Config) (*gorm.DB, error) {
+	// Wrap dbname in single quotes to safely handle hyphens in the database name
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=UTC",
+		"host=%s user=%s password=%s dbname='%s' port=%s sslmode=%s TimeZone=UTC",
 		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort, cfg.DBSSLMode,
 	)
 
@@ -32,12 +33,10 @@ func NewPostgresDB(cfg *config.Config) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// Connection Pool Settings
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	// Auto-migrate tables
 	if err := db.AutoMigrate(&orderModel.Order{}, &productModel.Product{}); err != nil {
 		log.Printf("Failed to run migrations: %v", err)
 		return nil, err

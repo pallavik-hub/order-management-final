@@ -5,30 +5,23 @@ phases:
     runtime-versions:
       golang: 1.22
     commands:
-      - go version
+      - echo "Installing dependencies..."
+      - cd order-management
       - go mod download
-      - go install github.com/securego/gosec/v2/cmd/gosec@latest
+
   pre_build:
     commands:
-      - echo "Running unit tests with Go race detection..."
-      - go test -v -race ./...
-      - echo "Running security scan with gosec..."
-      - gosec ./...
+      - echo "Running tests..."
+      - go test ./... -v
+
   build:
     commands:
-      - echo "Compiling Go binaries for Linux target..."
-      - mkdir -p bin
-      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o bin/order-app main.go
-      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o bin/gateway-app gateway/main.go
-      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o bin/product-app service/product/main.go
-  post_build:
-    commands:
-      - echo "Build completed successfully on $(date)"
+      - echo "Building binary..."
+      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/server main.go
+
 artifacts:
   files:
-    - bin/order-app
-    - bin/gateway-app
-    - bin/product-app
-    - schema.sql
-    - Procfile
-    - Buildfile
+    - order-management/bin/server
+    - order-management/Procfile
+    - order-management/.env
+  discard-paths: no

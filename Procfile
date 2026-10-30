@@ -1,3 +1,1 @@
-web: ./bin/order-app
-gateway: ./bin/gateway-app
-product: ./bin/product-app
+web: ./bin/server
